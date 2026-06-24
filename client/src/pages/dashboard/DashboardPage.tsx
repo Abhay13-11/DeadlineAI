@@ -5,9 +5,11 @@ import {
 } from 'lucide-react'
 import { useTasks } from '../../hooks/useTasks'
 import { useUIStore } from '../../store/uiStore'
+import { useNotifications } from '../../hooks/useNotifications'
 import { StatCard } from '../../components/dashboard/StatCard'
 import { ProductivityScore } from '../../components/dashboard/ProductivityScore'
 import { RecentActivity } from '../../components/dashboard/RecentActivity'
+import { DailyPlanWidget } from '../../components/dashboard/DailyPlanWidget'
 import { TaskCard } from '../../components/tasks/TaskCard'
 import { PageHeader } from '../../components/common/PageHeader'
 import { EmptyState } from '../../components/common/EmptyState'
@@ -17,6 +19,7 @@ export function DashboardPage() {
   const { dashboard, fetchDashboard } = useTasks()
   const { openTaskForm } = useUIStore()
   const { user } = useAuth()
+  useNotifications() // Auto-subscribes to web push on mount
 
   useEffect(() => { void fetchDashboard() }, [fetchDashboard])
 
@@ -38,14 +41,14 @@ export function DashboardPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard label="Total Tasks"    value={stats?.total ?? 0}        icon={CheckSquare}   color="#7C6AF7" />
-        <StatCard label="Completed"      value={stats?.completed ?? 0}    icon={TrendingUp}    color="#22C55E" />
-        <StatCard label="Pending"        value={stats?.pending ?? 0}      icon={Clock}         color="#3B82F6" />
-        <StatCard label="Overdue"        value={dashboard?.overdueTasks?.length ?? 0} icon={AlertTriangle} color="#EF4444" />
+        <StatCard label="Total Tasks"   value={stats?.total ?? 0}                         icon={CheckSquare}   color="#7C6AF7" />
+        <StatCard label="Completed"     value={stats?.completed ?? 0}                     icon={TrendingUp}    color="#22C55E" />
+        <StatCard label="Pending"       value={stats?.pending ?? 0}                       icon={Clock}         color="#3B82F6" />
+        <StatCard label="Overdue"       value={dashboard?.overdueTasks?.length ?? 0}      icon={AlertTriangle} color="#EF4444" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Today's tasks */}
+        {/* Left: task lists */}
         <div className="lg:col-span-2 space-y-4">
           <Section title="Today" count={dashboard?.todayTasks?.length}>
             {dashboard?.todayTasks?.length ? (
@@ -71,7 +74,7 @@ export function DashboardPage() {
 
         {/* Right column */}
         <div className="space-y-4">
-          {/* Productivity */}
+          {/* Productivity score */}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -81,7 +84,10 @@ export function DashboardPage() {
             <ProductivityScore score={stats?.completionRate ?? 0} />
           </motion.div>
 
-          {/* Overdue */}
+          {/* AI Daily Plan */}
+          <DailyPlanWidget />
+
+          {/* Overdue tasks */}
           {(dashboard?.overdueTasks?.length ?? 0) > 0 && (
             <Section title="Overdue 🔴" count={dashboard?.overdueTasks?.length}>
               {dashboard!.overdueTasks.map((t) => <TaskCard key={t._id} task={t} compact />)}
