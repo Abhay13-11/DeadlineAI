@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useCallback } from 'react'
 import { useAuthStore } from '../store/authStore'
-import { setAccessToken } from '../services/api'
+
 
 interface AuthContextValue {
   isReady: boolean
