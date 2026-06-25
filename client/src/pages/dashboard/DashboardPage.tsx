@@ -15,6 +15,7 @@ import { PageHeader } from '../../components/common/PageHeader'
 import { EmptyState } from '../../components/common/EmptyState'
 import { useAuth } from '../../hooks/useAuth'
 
+
 export function DashboardPage() {
   const { dashboard, fetchDashboard } = useTasks()
   const { openTaskForm } = useUIStore()
