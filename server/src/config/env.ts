@@ -43,4 +43,14 @@ if (!parsed.success) {
 }
 
 export const env = parsed.data
+
+// Warn about SRV URIs on startup — they can fail on Windows/Node 22+
+if (env.MONGODB_URI.startsWith('mongodb+srv://')) {
+  console.warn(
+    '⚠️  MONGODB_URI uses mongodb+srv:// which may fail on Windows/Node 22+.\n' +
+    '   If you see DNS errors, switch to a direct mongodb:// connection string.\n' +
+    '   Get it from: Atlas → Connect → Drivers → Standard connection string'
+  )
+}
+
 export type Env = z.infer<typeof envSchema>

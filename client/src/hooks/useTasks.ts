@@ -5,62 +5,75 @@ import { CreateTaskPayload, TaskStatus } from '../types'
 import toast from 'react-hot-toast'
 
 export function useTasks() {
-  const store = useTaskStore()
+  // Select individual primitives and actions — never the whole store object.
+  // Zustand selectors return stable references for functions and only
+  // re-render when the selected slice actually changes.
+  const tasks        = useTaskStore((s) => s.tasks)
+  const dashboard    = useTaskStore((s) => s.dashboard)
+  const isLoading    = useTaskStore((s) => s.isLoading)
+  const totalTasks   = useTaskStore((s) => s.totalTasks)
+  const currentPage  = useTaskStore((s) => s.currentPage)
+  const totalPages   = useTaskStore((s) => s.totalPages)
+  const setTasks     = useTaskStore((s) => s.setTasks)
+  const setDashboard = useTaskStore((s) => s.setDashboard)
+  const setLoading   = useTaskStore((s) => s.setLoading)
+  const upsertTask   = useTaskStore((s) => s.upsertTask)
+  const removeTask   = useTaskStore((s) => s.removeTask)
 
   const fetchTasks = useCallback(async (filters: TaskFilters = {}) => {
-    store.setLoading(true)
+    setLoading(true)
     try {
       const res = await taskService.getTasks(filters)
-      store.setTasks(res.data, res.meta.total, res.meta.page, res.meta.totalPages)
+      setTasks(res.data, res.meta.total, res.meta.page, res.meta.totalPages)
     } catch {
       toast.error('Failed to load tasks')
     } finally {
-      store.setLoading(false)
+      setLoading(false)
     }
-  }, [store])
+  }, [setLoading, setTasks])  // stable Zustand action references
 
   const fetchDashboard = useCallback(async () => {
     try {
       const res = await taskService.getDashboard()
-      store.setDashboard(res.data)
+      setDashboard(res.data)
     } catch {
       toast.error('Failed to load dashboard')
     }
-  }, [store])
+  }, [setDashboard])  // stable
 
   const createTask = useCallback(async (payload: CreateTaskPayload) => {
     const res = await taskService.create(payload)
-    store.upsertTask(res.data)
+    upsertTask(res.data)
     toast.success('Task created!')
     return res.data
-  }, [store])
+  }, [upsertTask])
 
   const updateTask = useCallback(async (id: string, payload: Partial<CreateTaskPayload>) => {
     const res = await taskService.update(id, payload)
-    store.upsertTask(res.data)
+    upsertTask(res.data)
     toast.success('Task updated')
     return res.data
-  }, [store])
+  }, [upsertTask])
 
   const changeStatus = useCallback(async (id: string, status: TaskStatus) => {
     const res = await taskService.updateStatus(id, status)
-    store.upsertTask(res.data)
+    upsertTask(res.data)
     return res.data
-  }, [store])
+  }, [upsertTask])
 
   const deleteTask = useCallback(async (id: string) => {
     await taskService.delete(id)
-    store.removeTask(id)
+    removeTask(id)
     toast.success('Task deleted')
-  }, [store])
+  }, [removeTask])
 
   return {
-    tasks: store.tasks,
-    dashboard: store.dashboard,
-    isLoading: store.isLoading,
-    totalTasks: store.totalTasks,
-    currentPage: store.currentPage,
-    totalPages: store.totalPages,
+    tasks,
+    dashboard,
+    isLoading,
+    totalTasks,
+    currentPage,
+    totalPages,
     fetchTasks,
     fetchDashboard,
     createTask,

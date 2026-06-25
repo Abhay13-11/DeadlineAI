@@ -21,6 +21,11 @@ import { getHealthStatus } from './utils/healthCheck'
 
 const app = express()
 
+// Required for express-rate-limit to correctly identify client IPs.
+// Without this, req.ip is undefined or ::ffff:127.0.0.1 in some environments,
+// causing all clients to share one rate limit bucket.
+app.set('trust proxy', 1)
+
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },

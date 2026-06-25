@@ -1,3 +1,7 @@
+import { setServers } from 'node:dns'
+setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1'])
+
+// All other imports below this line
 import { app } from './app'
 import { connectDB, disconnectDB } from './config/db'
 import { env } from './config/env'
@@ -10,25 +14,19 @@ import { initWebPush } from './services/notification/webpush.service'
 const PORT = parseInt(env.PORT, 10)
 
 async function bootstrap(): Promise<void> {
-  // 1. Database
   await connectDB()
-
-  // 2. Notification services (non-blocking)
   await initFCM()
   initWebPush()
 
-  // 3. HTTP server
   const server = app.listen(PORT, () => {
     logger.info(`🚀 DeadlineAI server running on port ${PORT} [${env.NODE_ENV}]`)
     logger.info(`   API: http://localhost:${PORT}/api/v1`)
     logger.info(`   Health: http://localhost:${PORT}/health`)
   })
 
-  // 4. Background cron jobs
   startReminderJob()
   startMissedTaskJob()
 
-  // 5. Graceful shutdown
   const shutdown = async (signal: string): Promise<void> => {
     logger.info(`${signal} received — shutting down gracefully...`)
     server.close(async () => {
@@ -44,12 +42,10 @@ async function bootstrap(): Promise<void> {
 
   process.on('SIGTERM', () => void shutdown('SIGTERM'))
   process.on('SIGINT', () => void shutdown('SIGINT'))
-
   process.on('unhandledRejection', (reason) => {
     logger.error('Unhandled rejection:', reason)
     void shutdown('unhandledRejection')
   })
-
   process.on('uncaughtException', (err) => {
     logger.error('Uncaught exception:', err)
     void shutdown('uncaughtException')
