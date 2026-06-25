@@ -10,13 +10,13 @@ const config: Config = {
     extend: {
       colors: {
         background: {
-          DEFAULT: '#0A0A0F',
-          surface: '#111118',
-          elevated: '#1A1A24',
+          DEFAULT: 'rgb(var(--bg) / <alpha-value>)',
+          surface: 'rgb(var(--bg-surface) / <alpha-value>)',
+          elevated: 'rgb(var(--bg-elevated) / <alpha-value>)',
         },
         border: {
-          DEFAULT: '#2A2A38',
-          hover: '#3D3D52',
+          DEFAULT: 'rgb(var(--border) / <alpha-value>)',
+          hover: 'rgb(var(--border-hover) / <alpha-value>)',
         },
         accent: {
           violet: '#7C6AF7',
@@ -26,9 +26,9 @@ const config: Config = {
           danger: '#EF4444',
         },
         text: {
-          primary: '#F1F0FF',
-          secondary: '#8B8BA7',
-          muted: '#4A4A6A',
+          primary: 'rgb(var(--text-primary) / <alpha-value>)',
+          secondary: 'rgb(var(--text-secondary) / <alpha-value>)',
+          muted: 'rgb(var(--text-muted) / <alpha-value>)',
         },
       },
       fontFamily: {

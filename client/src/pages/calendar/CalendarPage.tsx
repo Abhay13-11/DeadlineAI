@@ -68,21 +68,21 @@ export function CalendarPage() {
 
       <style>{`
         .calendar-wrapper .fc {
-          --fc-border-color: #2A2A38;
-          --fc-button-bg-color: #1A1A24;
-          --fc-button-border-color: #2A2A38;
-          --fc-button-hover-bg-color: #2A2A38;
+          --fc-border-color: rgb(var(--border));
+          --fc-button-bg-color: rgb(var(--bg-elevated));
+          --fc-button-border-color: rgb(var(--border));
+          --fc-button-hover-bg-color: rgb(var(--border));
           --fc-button-active-bg-color: #7C6AF7;
-          --fc-button-text-color: #8B8BA7;
+          --fc-button-text-color: rgb(var(--text-secondary));
           --fc-today-bg-color: rgba(124,106,247,0.08);
           --fc-page-bg-color: transparent;
           font-family: 'Inter', sans-serif;
-          color: #F1F0FF;
+          color: rgb(var(--text-primary));
         }
-        .calendar-wrapper .fc-toolbar-title { font-size: 1rem; font-weight: 600; color: #F1F0FF; }
+        .calendar-wrapper .fc-toolbar-title { font-size: 1rem; font-weight: 600; color: rgb(var(--text-primary)); }
         .calendar-wrapper .fc-col-header-cell-cushion,
-        .calendar-wrapper .fc-daygrid-day-number { color: #8B8BA7; font-size: 0.75rem; text-decoration: none; }
-        .calendar-wrapper .fc-daygrid-day-number:hover { color: #F1F0FF; }
+        .calendar-wrapper .fc-daygrid-day-number { color: rgb(var(--text-secondary)); font-size: 0.75rem; text-decoration: none; }
+        .calendar-wrapper .fc-daygrid-day-number:hover { color: rgb(var(--text-primary)); }
         .calendar-wrapper .fc-event { border-radius: 4px; border: none; font-size: 0.7rem; font-weight: 500; padding: 1px 4px; cursor: pointer; }
         .calendar-wrapper .fc-button { border-radius: 6px !important; font-size: 0.75rem !important; padding: 4px 10px !important; }
         .calendar-wrapper .fc-button-primary:not(:disabled):active,

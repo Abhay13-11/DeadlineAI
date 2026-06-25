@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, Loader2, Sparkles, Trash2 } from 'lucide-react'
-import { aiService } from '../../services/aiService'
+import { aiService, getAIErrorMessage } from '../../services/aiService'
 import { useUIStore } from '../../store/uiStore'
 import { AIMessage } from '../../types'
 import { formatRelative } from '../../utils/formatters'
@@ -56,8 +56,8 @@ export function AIChatPanel() {
         timestamp: new Date().toISOString(),
       }
       setMessages((m) => [...m, assistantMsg])
-    } catch {
-      toast.error('AI is unavailable right now')
+    } catch (error) {
+      toast.error(getAIErrorMessage(error))
       setMessages((m) => m.filter((msg) => msg._id !== userMsg._id))
     } finally {
       setLoading(false)

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Loader2, Sparkles, Trash2 } from 'lucide-react'
-import { aiService } from '../../services/aiService'
+import { aiService, getAIErrorMessage } from '../../services/aiService'
 import { AIMessage } from '../../types'
 import { formatRelative } from '../../utils/formatters'
 import { PageHeader } from '../../components/common/PageHeader'
@@ -45,8 +45,8 @@ export function AIAssistantPage() {
       const res = await aiService.sendMessage(text)
       const assistantMsg: AIMessage = { _id: `a-${Date.now()}`, role: 'assistant', content: res.data.reply, timestamp: new Date().toISOString() }
       setMessages((m) => [...m, assistantMsg])
-    } catch {
-      toast.error('AI is unavailable right now')
+    } catch (error) {
+      toast.error(getAIErrorMessage(error))
       setMessages((m) => m.filter((msg) => msg._id !== userMsg._id))
     } finally {
       setLoading(false)

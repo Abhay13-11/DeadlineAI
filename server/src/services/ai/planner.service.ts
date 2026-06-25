@@ -1,10 +1,7 @@
-import OpenAI from 'openai'
 import { Types } from 'mongoose'
-import { env } from '../../config/env'
 import { Task } from '../../models/Task.model'
 import { startOfDay, endOfDay, addDays } from 'date-fns'
-
-const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY })
+import { generateGeminiText } from './geminiClient.service'
 
 export class PlannerService {
   async generateDailyPlan(userId: string): Promise<string> {
@@ -51,17 +48,14 @@ Generate a practical daily plan with:
 
 Keep it concise, friendly, and actionable. Use bullet points.`
 
-    const completion = await openai.chat.completions.create({
-      model: env.OPENAI_MODEL,
-      messages: [
-        { role: 'system', content: 'You are a helpful productivity coach for students and professionals.' },
-        { role: 'user', content: prompt },
-      ],
-      max_tokens: 600,
+    const plan = await generateGeminiText({
+      systemInstruction: 'You are a helpful productivity coach for students and professionals.',
+      prompt,
+      maxOutputTokens: 600,
       temperature: 0.7,
     })
 
-    return completion.choices[0]?.message?.content?.trim() ?? 'Could not generate plan.'
+    return plan || 'Could not generate plan.'
   }
 }
 

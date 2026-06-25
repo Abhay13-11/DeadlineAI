@@ -1,11 +1,8 @@
-import OpenAI from 'openai'
 import { Types } from 'mongoose'
-import { env } from '../../config/env'
 import { AIConversation } from '../../models/AIConversation.model'
 import { Task } from '../../models/Task.model'
 import { logger } from '../../utils/logger'
-
-const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY })
+import { GeminiMessage, generateGeminiResponse } from './geminiClient.service'
 
 const SYSTEM_PROMPT = `You are DeadlineAI, a highly intelligent personal productivity assistant for college students and professionals.
 
@@ -63,23 +60,22 @@ export class AIChatService {
     // Keep last 20 messages for context window efficiency
     const recentMessages = conversation.messages.slice(-20)
 
-    const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-      { role: 'system', content: systemPrompt },
+    const geminiMessages: GeminiMessage[] = [
       ...recentMessages.map((m) => ({
-        role: m.role as 'user' | 'assistant',
-        content: m.content,
+        role: m.role === 'assistant' ? 'model' as const : 'user' as const,
+        text: m.content,
       })),
-      { role: 'user', content: userMessage },
+      { role: 'user', text: userMessage },
     ]
 
-    const completion = await openai.chat.completions.create({
-      model: env.OPENAI_MODEL,
-      messages: openaiMessages,
-      max_tokens: 800,
+    const response = await generateGeminiResponse({
+      systemInstruction: systemPrompt,
+      messages: geminiMessages,
+      maxOutputTokens: 800,
       temperature: 0.7,
     })
 
-    const reply = completion.choices[0]?.message?.content?.trim() ?? 'Sorry, I could not generate a response.'
+    const reply = response.text?.trim() ?? 'Sorry, I could not generate a response.'
 
     // Persist both messages
     conversation.messages.push(
@@ -94,7 +90,7 @@ export class AIChatService {
 
     await conversation.save()
 
-    logger.info(`AI chat: user=${userId} tokens=${completion.usage?.total_tokens}`)
+    logger.info(`AI chat: user=${userId} tokens=${response.usageMetadata?.totalTokenCount}`)
     return reply
   }
 

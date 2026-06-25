@@ -1,5 +1,18 @@
+import { AxiosError } from 'axios'
 import { api } from './api'
 import { ApiResponse, AIMessage, ITask } from '../types'
+
+interface ApiErrorBody {
+  message?: string
+}
+
+export function getAIErrorMessage(error: unknown): string {
+  if (error instanceof AxiosError) {
+    const message = (error.response?.data as ApiErrorBody | undefined)?.message
+    if (message) return message
+  }
+  return 'AI is unavailable right now'
+}
 
 export const aiService = {
   async sendMessage(message: string): Promise<ApiResponse<{ reply: string; taskReferences?: ITask[] }>> {

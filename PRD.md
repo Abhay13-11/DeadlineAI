@@ -650,9 +650,9 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GOOGLE_CALLBACK_URL=http://localhost:5000/api/v1/auth/google/callback
 
-# OpenAI
-OPENAI_API_KEY=
-OPENAI_MODEL=gpt-4o
+# Gemini
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash
 
 # Firebase Admin
 FIREBASE_SERVICE_ACCOUNT_KEY=  # base64 encoded JSON
@@ -739,7 +739,7 @@ Week 4:
     → Load conversation history from DB
     → Fetch relevant tasks (all tasks for this user)
     → Build system prompt with task context
-    → Call OpenAI API (gpt-4o)
+    → Call Gemini API (gemini-2.5-flash)
     → Stream response back to client
     → Save message pair to ai_conversations
     → If AI creates task from chat → POST /tasks
@@ -750,7 +750,7 @@ Week 4:
 [User uploads image/PDF]
     → POST /api/v1/ai/create-from-image (multipart)
     → Save to Cloudinary temporarily
-    → Send to OpenAI Vision API with extraction prompt
+    → Send to Gemini multimodal API with extraction prompt
     → Parse structured JSON response
     → Return pre-filled task form to frontend
     → User reviews + confirms

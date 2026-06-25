@@ -1,10 +1,5 @@
-import OpenAI from 'openai'
-import { env } from '../../config/env'
 import { logger } from '../../utils/logger'
-import * as fs from 'fs'
-import * as path from 'path'
-
-const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY })
+import { generateGeminiText } from './geminiClient.service'
 
 const OCR_VISION_PROMPT = `You are an OCR and information extraction assistant.
 
@@ -21,95 +16,59 @@ KEY INFORMATION:
 export class OCRService {
   async extractFromImageBuffer(buffer: Buffer, mimeType: string): Promise<string> {
     const base64 = buffer.toString('base64')
-    const dataUrl = `data:${mimeType};base64,${base64}`
 
-    const completion = await openai.chat.completions.create({
-      model: env.OPENAI_MODEL,
-      messages: [
+    const result = await generateGeminiText({
+      parts: [
         {
-          role: 'user',
-          content: [
-            {
-              type: 'image_url',
-              image_url: { url: dataUrl, detail: 'high' },
-            },
-            {
-              type: 'text',
-              text: OCR_VISION_PROMPT,
-            },
-          ],
+          inlineData: {
+            data: base64,
+            mimeType,
+          },
         },
+        { text: OCR_VISION_PROMPT },
       ],
-      max_tokens: 1500,
+      maxOutputTokens: 1500,
     })
 
-    const result = completion.choices[0]?.message?.content?.trim() ?? ''
     logger.info(`OCR extraction complete: ${result.length} chars`)
     return result
   }
 
   async extractFromImageUrl(imageUrl: string): Promise<string> {
-    const completion = await openai.chat.completions.create({
-      model: env.OPENAI_MODEL,
-      messages: [
+    return generateGeminiText({
+      parts: [
         {
-          role: 'user',
-          content: [
-            {
-              type: 'image_url',
-              image_url: { url: imageUrl, detail: 'high' },
-            },
-            {
-              type: 'text',
-              text: OCR_VISION_PROMPT,
-            },
-          ],
+          fileData: {
+            fileUri: imageUrl,
+            mimeType: 'image/*',
+          },
         },
+        { text: OCR_VISION_PROMPT },
       ],
-      max_tokens: 1500,
+      maxOutputTokens: 1500,
     })
-
-    return completion.choices[0]?.message?.content?.trim() ?? ''
   }
 
-//   async extractFromPDFBuffer(buffer: Buffer): Promise<string> {
-//     // For PDFs, we encode as base64 and send as document
-//     // GPT-4o supports PDF documents directly
-//     const base64 = buffer.toString('base64')
-
-//     const completion = await openai.chat.completions.create({
-//       model: env.OPENAI_MODEL,
-//       messages: [
-//         {
-//           role: 'user',
-//           content: [
-//             {
-//               type: 'text',
-//               text: `Please extract all text from this PDF document and identify any tasks, deadlines, dates, required documents, or action items.\n\nFormat:\nEXTRACTED TEXT:\n[all text]\n\nKEY INFORMATION:\n[deadlines and tasks found]`,
-//             },
-//             // @ts-expect-error -- GPT-4o supports file input; type not yet in SDK types
-//             {
-//               type: 'file',
-//               file: {
-//                 data: base64,
-//                 mime_type: 'application/pdf',
-//               },
-//             },
-//           ],
-//         },
-//       ],
-//       max_tokens: 2000,
-//     })
-
-//     const result = completion.choices[0]?.message?.content?.trim() ?? ''
-//     logger.info(`PDF OCR extraction complete: ${result.length} chars`)
-//     return result
-//   }
-
   async extractFromPDFBuffer(buffer: Buffer): Promise<string> {
-  logger.warn('PDF OCR is temporarily disabled.')
-  return 'PDF OCR is not implemented yet.'
-}
+    const base64 = buffer.toString('base64')
+    const result = await generateGeminiText({
+      parts: [
+        {
+          inlineData: {
+            data: base64,
+            mimeType: 'application/pdf',
+          },
+        },
+        {
+          text: 'Please extract all text from this PDF document and identify any tasks, deadlines, dates, required documents, or action items.\n\nFormat:\nEXTRACTED TEXT:\n[all text]\n\nKEY INFORMATION:\n[deadlines and tasks found]',
+        },
+      ],
+      maxOutputTokens: 2000,
+    })
+
+    logger.info(`PDF OCR extraction complete: ${result.length} chars`)
+    return result
+  }
 }
 
 export const ocrService = new OCRService()

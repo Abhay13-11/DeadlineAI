@@ -9,7 +9,8 @@ import toast from 'react-hot-toast'
 
 export function SettingsPage() {
   const { user, fetchMe } = useAuth()
-  const { theme, setTheme } = useUIStore()
+  const theme = useUIStore((s) => s.theme)
+  const setTheme = useUIStore((s) => s.setTheme)
   const [saving, setSaving] = useState(false)
   const [pushEnabled, setPushEnabled] = useState(user?.preferences?.notifications?.push ?? true)
 
@@ -69,6 +70,8 @@ export function SettingsPage() {
           </div>
           <button
             onClick={handleThemeToggle}
+            aria-label="Toggle color theme"
+            aria-pressed={theme === 'dark'}
             className={`relative w-12 h-6 rounded-full border transition-all ${
               theme === 'dark'
                 ? 'bg-accent-violet border-accent-violet'

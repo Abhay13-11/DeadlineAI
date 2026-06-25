@@ -14,7 +14,7 @@ import { chatMessageSchema, naturalLanguageTaskSchema } from '../validators/ai.v
 
 const router = Router()
 
-// Memory storage — we pass buffer directly to OpenAI, no disk writes needed
+// Memory storage: uploaded files stay in memory and are passed directly to the AI provider.
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB

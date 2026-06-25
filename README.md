@@ -16,7 +16,7 @@ Built for college students, job seekers, and professionals who need to track int
 | Backend | Node.js, Express, TypeScript |
 | Database | MongoDB Atlas + Mongoose |
 | Auth | Google OAuth 2.0 + JWT |
-| AI | OpenAI GPT-4o (chat, OCR, task parsing) |
+| AI | Google Gemini 2.5 Flash (chat, OCR, task parsing) |
 | Notifications | Firebase Cloud Messaging + Web Push |
 | Calendar | FullCalendar |
 | Deployment | Vercel (frontend) + Railway (backend) |
@@ -29,7 +29,7 @@ Built for college students, job seekers, and professionals who need to track int
 - Node.js 22 LTS
 - MongoDB Atlas cluster
 - Google Cloud OAuth credentials
-- OpenAI API key
+- Gemini API key
 
 ### Setup
 

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { isGeminiConfigured } from '../services/ai/geminiClient.service'
 
 export interface HealthStatus {
   status: 'healthy' | 'degraded' | 'unhealthy'
@@ -23,7 +24,7 @@ export function getHealthStatus(env: Record<string, string | undefined>): Health
 
   const services = {
     database: dbStatus,
-    ai: env.OPENAI_API_KEY ? 'configured' : 'not_configured',
+    ai: isGeminiConfigured(env.GEMINI_API_KEY) ? 'configured' : 'not_configured',
     fcm: env.FIREBASE_SERVICE_ACCOUNT_KEY ? 'configured' : 'not_configured',
     webPush: env.VAPID_PUBLIC_KEY ? 'configured' : 'not_configured',
   } as HealthStatus['services']

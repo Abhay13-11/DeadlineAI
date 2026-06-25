@@ -12,7 +12,7 @@ export function ProductivityScore({ score }: Props) {
     <div className="flex items-center gap-4">
       <div className="relative w-16 h-16">
         <svg viewBox="0 0 64 64" className="-rotate-90 w-16 h-16">
-          <circle cx="32" cy="32" r={r} fill="none" stroke="#2A2A38" strokeWidth="6" />
+          <circle cx="32" cy="32" r={r} fill="none" stroke="rgb(var(--border))" strokeWidth="6" />
           <circle
             cx="32" cy="32" r={r} fill="none"
             stroke={color} strokeWidth="6"

@@ -90,14 +90,14 @@ export function AnalyticsPage() {
           </div>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={weekly.dailyBreakdown} barGap={2}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2A2A38" vertical={false} />
-              <XAxis dataKey="day" tick={{ fill: '#8B8BA7', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#8B8BA7', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" vertical={false} />
+              <XAxis dataKey="day" tick={{ fill: 'rgb(var(--text-secondary))', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: 'rgb(var(--text-secondary))', fontSize: 11 }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{ background: '#1A1A24', border: '1px solid #2A2A38', borderRadius: 8, fontSize: 12 }}
-                labelStyle={{ color: '#F1F0FF' }}
+                contentStyle={{ background: 'rgb(var(--bg-elevated))', border: '1px solid rgb(var(--border))', borderRadius: 8, fontSize: 12 }}
+                labelStyle={{ color: 'rgb(var(--text-primary))' }}
               />
-              <Bar dataKey="total" name="Total" fill="#2A2A38" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="total" name="Total" fill="rgb(var(--border))" radius={[4, 4, 0, 0]} />
               <Bar dataKey="completed" name="Completed" fill="#7C6AF7" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -118,9 +118,9 @@ export function AnalyticsPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ background: '#1A1A24', border: '1px solid #2A2A38', borderRadius: 8, fontSize: 12 }}
+                  contentStyle={{ background: 'rgb(var(--bg-elevated))', border: '1px solid rgb(var(--border))', borderRadius: 8, fontSize: 12 }}
                 />
-                <Legend wrapperStyle={{ fontSize: 11, color: '#8B8BA7' }} />
+                <Legend wrapperStyle={{ fontSize: 11, color: 'rgb(var(--text-secondary))' }} />
               </PieChart>
             </ResponsiveContainer>
           </motion.div>
@@ -133,10 +133,10 @@ export function AnalyticsPage() {
             <h3 className="text-sm font-semibold text-text-primary mb-4">By Priority</h3>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={overview.priorityBreakdown} layout="vertical">
-                <XAxis type="number" tick={{ fill: '#8B8BA7', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="_id" tick={{ fill: '#8B8BA7', fontSize: 11 }} axisLine={false} tickLine={false} width={60} />
+                <XAxis type="number" tick={{ fill: 'rgb(var(--text-secondary))', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="_id" tick={{ fill: 'rgb(var(--text-secondary))', fontSize: 11 }} axisLine={false} tickLine={false} width={60} />
                 <Tooltip
-                  contentStyle={{ background: '#1A1A24', border: '1px solid #2A2A38', borderRadius: 8, fontSize: 12 }}
+                  contentStyle={{ background: 'rgb(var(--bg-elevated))', border: '1px solid rgb(var(--border))', borderRadius: 8, fontSize: 12 }}
                 />
                 <Bar dataKey="count" name="Tasks" radius={[0, 4, 4, 0]}>
                   {overview.priorityBreakdown.map((entry) => (
@@ -155,11 +155,11 @@ export function AnalyticsPage() {
             <h3 className="text-sm font-semibold text-text-primary mb-4">Completion Trend (Last 4 Weeks)</h3>
             <ResponsiveContainer width="100%" height={160}>
               <LineChart data={overview.completionTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A38" vertical={false} />
-                <XAxis dataKey="_id" tick={{ fill: '#8B8BA7', fontSize: 10 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#8B8BA7', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" vertical={false} />
+                <XAxis dataKey="_id" tick={{ fill: 'rgb(var(--text-secondary))', fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: 'rgb(var(--text-secondary))', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip
-                  contentStyle={{ background: '#1A1A24', border: '1px solid #2A2A38', borderRadius: 8, fontSize: 12 }}
+                  contentStyle={{ background: 'rgb(var(--bg-elevated))', border: '1px solid rgb(var(--border))', borderRadius: 8, fontSize: 12 }}
                 />
                 <Line type="monotone" dataKey="count" stroke="#7C6AF7" strokeWidth={2} dot={{ fill: '#7C6AF7', r: 4 }} name="Completed" />
               </LineChart>

@@ -1,11 +1,8 @@
-import OpenAI from 'openai'
-import { env } from '../../config/env'
 import { logger } from '../../utils/logger'
 import {
   TaskCategory, TaskPriority, TASK_CATEGORIES, TASK_PRIORITIES,
 } from '../../types'
-
-const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY })
+import { generateGeminiText } from './geminiClient.service'
 
 export interface ParsedTask {
   title: string
@@ -53,17 +50,13 @@ Rules:
 
 export class TaskParserService {
   async parseFromText(input: string): Promise<ParsedTask> {
-    const completion = await openai.chat.completions.create({
-      model: env.OPENAI_MODEL,
-      messages: [
-        { role: 'system', content: PARSER_PROMPT },
-        { role: 'user', content: input },
-      ],
-      max_tokens: 600,
-      temperature: 0.2, // Low temp for consistent structured output
+    const raw = await generateGeminiText({
+      systemInstruction: PARSER_PROMPT,
+      prompt: input,
+      maxOutputTokens: 600,
+      temperature: 0.2,
+      responseMimeType: 'application/json',
     })
-
-    const raw = completion.choices[0]?.message?.content?.trim() ?? '{}'
 
     try {
       // Strip any accidental markdown fences
@@ -87,17 +80,13 @@ The following text was extracted from an image or PDF and may contain MULTIPLE t
 Extract ALL tasks you can find. Return a JSON ARRAY of task objects (same schema as above).
 If only one task, still return an array with one item.`
 
-    const completion = await openai.chat.completions.create({
-      model: env.OPENAI_MODEL,
-      messages: [
-        { role: 'system', content: multiPrompt },
-        { role: 'user', content: `Extracted text:\n\n${extractedText}` },
-      ],
-      max_tokens: 1500,
+    const raw = await generateGeminiText({
+      systemInstruction: multiPrompt,
+      prompt: `Extracted text:\n\n${extractedText}`,
+      maxOutputTokens: 1500,
       temperature: 0.2,
+      responseMimeType: 'application/json',
     })
-
-    const raw = completion.choices[0]?.message?.content?.trim() ?? '[]'
 
     try {
       const cleaned = raw.replace(/```json|```/g, '').trim()
