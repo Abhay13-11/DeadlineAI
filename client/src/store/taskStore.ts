@@ -1,9 +1,12 @@
 import { create } from 'zustand'
 import { ITask, DashboardData } from '../types'
 
+export type DashboardRequestStatus = 'idle' | 'loading' | 'loaded' | 'error'
+
 interface TaskState {
   tasks: ITask[]
   dashboard: DashboardData | null
+  dashboardStatus: DashboardRequestStatus
   selectedTask: ITask | null
   isLoading: boolean
   totalTasks: number
@@ -11,6 +14,7 @@ interface TaskState {
   totalPages: number
   setTasks: (tasks: ITask[], total: number, page: number, totalPages: number) => void
   setDashboard: (data: DashboardData) => void
+  setDashboardStatus: (status: DashboardRequestStatus) => void
   setSelectedTask: (task: ITask | null) => void
   upsertTask: (task: ITask) => void
   removeTask: (id: string) => void
@@ -20,6 +24,7 @@ interface TaskState {
 export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
   dashboard: null,
+  dashboardStatus: 'idle',
   selectedTask: null,
   isLoading: false,
   totalTasks: 0,
@@ -29,7 +34,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   setTasks: (tasks, total, page, totalPages) =>
     set({ tasks, totalTasks: total, currentPage: page, totalPages }),
 
-  setDashboard: (data) => set({ dashboard: data }),
+  setDashboard: (data) => set({ dashboard: data, dashboardStatus: 'loaded' }),
+
+  setDashboardStatus: (dashboardStatus) => set({ dashboardStatus }),
 
   setSelectedTask: (task) => set({ selectedTask: task }),
 

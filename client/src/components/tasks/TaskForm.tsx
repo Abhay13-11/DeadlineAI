@@ -82,8 +82,12 @@ export function TaskForm({ taskId, onClose, prefill }: Props) {
       const payload: CreateTaskPayload = {
         ...form,
         deadline: form.deadline ? new Date(form.deadline).toISOString() : undefined,
+        deadlineTime: form.deadlineTime || undefined,
+        description: form.description || undefined,
+        location: form.location || undefined,
         meetingLink: form.meetingLink || undefined,
         websiteLink: form.websiteLink || undefined,
+        notes: form.notes || undefined,
       }
       if (isEditing) {
         await updateTask(taskId, payload)

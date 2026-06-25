@@ -22,6 +22,29 @@ export interface PaginatedTasks {
   totalPages: number
 }
 
+function normalizeTaskPayload<T extends Partial<CreateTaskPayload>>(payload: T): T {
+  const optionalStrings: Array<keyof CreateTaskPayload> = [
+    'description', 'deadline', 'deadlineTime', 'location',
+    'meetingLink', 'websiteLink', 'notes',
+  ]
+  const normalized = { ...payload } as T
+
+  for (const key of optionalStrings) {
+    if (normalized[key] === '') {
+      delete normalized[key]
+    }
+  }
+
+  if (normalized.reminders) {
+    normalized.reminders = normalized.reminders.map((reminder) => ({
+      ...reminder,
+      ...(reminder.customTime ? {} : { customTime: undefined }),
+    })) as T['reminders']
+  }
+
+  return normalized
+}
+
 export const taskService = {
   async getTasks(filters: TaskFilters = {}): Promise<ApiResponse<ITask[]> & { meta: { total: number; page: number; totalPages: number; limit: number } }> {
     const params = new URLSearchParams()
@@ -43,12 +66,12 @@ export const taskService = {
   },
 
   async create(payload: CreateTaskPayload): Promise<ApiResponse<ITask>> {
-    const res = await api.post<ApiResponse<ITask>>('/tasks', payload)
+    const res = await api.post<ApiResponse<ITask>>('/tasks', normalizeTaskPayload(payload))
     return res.data
   },
 
   async update(id: string, payload: Partial<CreateTaskPayload>): Promise<ApiResponse<ITask>> {
-    const res = await api.put<ApiResponse<ITask>>(`/tasks/${id}`, payload)
+    const res = await api.put<ApiResponse<ITask>>(`/tasks/${id}`, normalizeTaskPayload(payload))
     return res.data
   },
 

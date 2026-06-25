@@ -13,7 +13,7 @@ export async function getTasks(req: Request, res: Response): Promise<void> {
   const result = await taskService.getTasks(user._id.toString(), query)
   sendSuccess(res, result.items, 'Tasks retrieved', 200, {
     page: result.page,
-    limit: 0,
+    limit: query.limit,
     total: result.total,
     totalPages: result.totalPages,
   })

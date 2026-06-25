@@ -8,8 +8,15 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+const refreshApi = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
+})
+
 // In-memory access token (never stored in localStorage for XSS safety)
 let _accessToken: string | null = null
+let onAuthenticationFailure: (() => void) | null = null
 
 export function setAccessToken(token: string | null): void {
   _accessToken = token
@@ -17,6 +24,10 @@ export function setAccessToken(token: string | null): void {
 
 export function getAccessToken(): string | null {
   return _accessToken
+}
+
+export function setAuthenticationFailureHandler(handler: () => void): void {
+  onAuthenticationFailure = handler
 }
 
 // Attach token to every request
@@ -63,7 +74,7 @@ api.interceptors.response.use(
       isRefreshing = true
 
       try {
-        const res = await api.post<{ data: { accessToken: string } }>('/auth/refresh')
+        const res = await refreshApi.post<{ data: { accessToken: string } }>('/auth/refresh')
         const newToken = res.data.data.accessToken
         setAccessToken(newToken)
         processQueue(null, newToken)
@@ -72,7 +83,7 @@ api.interceptors.response.use(
       } catch (refreshErr) {
         processQueue(refreshErr, null)
         setAccessToken(null)
-        window.location.href = '/login'
+        onAuthenticationFailure?.()
         return Promise.reject(refreshErr)
       } finally {
         isRefreshing = false

@@ -21,7 +21,9 @@ export function DashboardPage() {
   const { user } = useAuth()
   useNotifications() // Auto-subscribes to web push on mount
 
-  useEffect(() => { void fetchDashboard() }, [fetchDashboard])
+  useEffect(() => {
+    void fetchDashboard().catch(() => undefined)
+  }, [fetchDashboard])
 
   const stats = dashboard?.stats
   const hour = new Date().getHours()

@@ -9,8 +9,14 @@ import { env } from '../config/env'
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  sameSite: env.NODE_ENV === 'production' ? 'none' as const : 'lax' as const,
   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+}
+
+const CLEAR_REFRESH_COOKIE_OPTIONS = {
+  httpOnly: REFRESH_COOKIE_OPTIONS.httpOnly,
+  secure: REFRESH_COOKIE_OPTIONS.secure,
+  sameSite: REFRESH_COOKIE_OPTIONS.sameSite,
 }
 
 function issueTokens(user: IUser) {
@@ -55,7 +61,7 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
 }
 
 export function logout(_req: Request, res: Response): void {
-  res.clearCookie('refreshToken')
+  res.clearCookie('refreshToken', CLEAR_REFRESH_COOKIE_OPTIONS)
   sendSuccess(res, null, 'Logged out successfully')
 }
 

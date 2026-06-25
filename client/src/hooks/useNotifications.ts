@@ -3,7 +3,7 @@ import { useAuthStore } from '../store/authStore'
 import { authService } from '../services/authService'
 
 export function useNotifications() {
-  const { isAuthenticated } = useAuthStore()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
     if (!('Notification' in window)) return false

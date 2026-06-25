@@ -1,34 +1,52 @@
 import { z } from 'zod'
 import { TASK_CATEGORIES, TASK_PRIORITIES, TASK_STATUSES } from '../types'
 
+const emptyToUndefined = (value: unknown): unknown =>
+  typeof value === 'string' && value.trim() === '' ? undefined : value
+
 const reminderSchema = z.object({
   type: z.enum(['1w', '3d', '1d', '6h', '1h', '30m', '5m', 'custom']),
-  customTime: z.string().datetime({ offset: true }).optional(),
+  customTime: z.preprocess(
+    emptyToUndefined,
+    z.string().datetime({ offset: true }).optional()
+  ),
   sent: z.boolean().default(false),
 })
 
 const recurringSchema = z.object({
   enabled: z.boolean().default(false),
   frequency: z.enum(['daily', 'weekly', 'monthly', 'custom']).optional(),
-  until: z.string().datetime({ offset: true }).optional(),
+  until: z.preprocess(
+    emptyToUndefined,
+    z.string().datetime({ offset: true }).optional()
+  ),
   interval: z.number().int().min(1).default(1),
 })
 
 export const createTaskSchema = z.object({
   title: z.string().trim().min(1, 'Title is required').max(200),
-  description: z.string().trim().max(5000).optional(),
+  description: z.preprocess(emptyToUndefined, z.string().trim().max(5000).optional()),
   category: z.enum(TASK_CATEGORIES as [string, ...string[]]).default('Others'),
   priority: z.enum(TASK_PRIORITIES as [string, ...string[]]).default('Medium'),
   status: z.enum(TASK_STATUSES as [string, ...string[]]).default('Pending'),
-  deadline: z.string().datetime({ offset: true }).optional(),
-  deadlineTime: z
-    .string()
-    .regex(/^([01]?\d|2[0-3]):[0-5]\d$/, 'Use HH:MM format')
-    .optional(),
-  location: z.string().trim().max(300).optional(),
-  meetingLink: z.string().url('Invalid URL').optional().or(z.literal('')),
-  websiteLink: z.string().url('Invalid URL').optional().or(z.literal('')),
-  notes: z.string().max(10000).optional(),
+  deadline: z.preprocess(
+    emptyToUndefined,
+    z.string().datetime({ offset: true }).optional()
+  ),
+  deadlineTime: z.preprocess(
+    emptyToUndefined,
+    z.string().regex(/^([01]?\d|2[0-3]):[0-5]\d$/, 'Use HH:MM format').optional()
+  ),
+  location: z.preprocess(emptyToUndefined, z.string().trim().max(300).optional()),
+  meetingLink: z.preprocess(
+    emptyToUndefined,
+    z.string().url('Invalid URL').optional()
+  ),
+  websiteLink: z.preprocess(
+    emptyToUndefined,
+    z.string().url('Invalid URL').optional()
+  ),
+  notes: z.preprocess(emptyToUndefined, z.string().max(10000).optional()),
   requiredDocuments: z.array(z.string().trim().min(1)).max(20).default([]),
   reminders: z.array(reminderSchema).default([]),
   recurring: recurringSchema.default({ enabled: false, interval: 1 }),
