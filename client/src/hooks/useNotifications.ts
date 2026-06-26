@@ -2,7 +2,7 @@ import { useEffect, useCallback } from 'react'
 import { useAuthStore } from '../store/authStore'
 import { authService } from '../services/authService'
 
-export function useNotifications() {
+export function useNotifications(autoSubscribe = true) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
@@ -38,10 +38,10 @@ export function useNotifications() {
   }, [isAuthenticated, requestPermission])
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (autoSubscribe && isAuthenticated) {
       void subscribeWebPush()
     }
-  }, [isAuthenticated, subscribeWebPush])
+  }, [autoSubscribe, isAuthenticated, subscribeWebPush])
 
   return { requestPermission, subscribeWebPush }
 }

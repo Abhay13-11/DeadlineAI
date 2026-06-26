@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import { LoadingScreen } from './components/common/LoadingScreen'
 import { AppShell } from './components/common/AppShell'
@@ -22,6 +24,21 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const { isLoading } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'NAVIGATE' && typeof event.data.url === 'string') {
+        void navigate(event.data.url)
+      }
+    }
+
+    navigator.serviceWorker.addEventListener('message', handleMessage)
+    return () => navigator.serviceWorker.removeEventListener('message', handleMessage)
+  }, [navigate])
+
   if (isLoading) return <LoadingScreen />
 
   return (
