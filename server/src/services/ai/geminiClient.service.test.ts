@@ -1,5 +1,5 @@
 import { AppError } from '../../utils/AppError'
-import { generateGeminiText, isGeminiConfigured } from './geminiClient.service'
+import { assertGeminiConfigured, isGeminiConfigured } from './geminiClient.service'
 
 describe('Gemini configuration', () => {
   it('rejects placeholder and malformed keys', () => {
@@ -12,10 +12,12 @@ describe('Gemini configuration', () => {
     expect(isGeminiConfigured(`AIzaSy${'a'.repeat(34)}`)).toBe(true)
   })
 
-  it('returns a service-unavailable error when the API key is missing', async () => {
-    await expect(generateGeminiText({ prompt: 'hello' })).rejects.toMatchObject<Partial<AppError>>({
-      statusCode: 503,
-      message: 'AI provider is not configured. Set a valid GEMINI_API_KEY on the server.',
-    })
+  it('returns a service-unavailable error when the API key is missing', () => {
+    expect(() => assertGeminiConfigured('')).toThrow(
+      expect.objectContaining<Partial<AppError>>({
+        statusCode: 503,
+        message: 'AI provider is not configured. Set a valid GEMINI_API_KEY on the server.',
+      })
+    )
   })
 })

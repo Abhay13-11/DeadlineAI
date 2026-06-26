@@ -36,6 +36,15 @@ export function isGeminiConfigured(apiKey = env.GEMINI_API_KEY): boolean {
   return key.length > 20 && !PLACEHOLDER_KEY_PATTERNS.some((pattern) => pattern.test(key))
 }
 
+export function assertGeminiConfigured(apiKey = env.GEMINI_API_KEY): void {
+  if (!isGeminiConfigured(apiKey)) {
+    throw new AppError(
+      'AI provider is not configured. Set a valid GEMINI_API_KEY on the server.',
+      503
+    )
+  }
+}
+
 let geminiClient: GoogleGenAI | null = null
 
 export function getGeminiClient(): GoogleGenAI {
@@ -73,12 +82,7 @@ function providerCode(error: unknown): string | undefined {
 export async function generateGeminiResponse(
   options: GeminiGenerateTextOptions
 ): Promise<GenerateContentResponse> {
-  if (!isGeminiConfigured()) {
-    throw new AppError(
-      'AI provider is not configured. Set a valid GEMINI_API_KEY on the server.',
-      503
-    )
-  }
+  assertGeminiConfigured()
 
   const config: GenerateContentConfig = {
     systemInstruction: options.systemInstruction,
