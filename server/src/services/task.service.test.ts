@@ -1,7 +1,11 @@
 import { Task } from '../models/Task.model'
 import { ActivityLog } from '../models/ActivityLog.model'
 import { User } from '../models/User.model'
-import { taskService } from './task.service'
+import {
+  compareTasksByPriority,
+  getReminderDeadlineCeiling,
+  taskService,
+} from './task.service'
 
 jest.mock('../models/Task.model', () => ({
   Task: {
@@ -58,6 +62,51 @@ describe('TaskService.create', () => {
         action: 'task_created',
         metadata: { title: 'Minimal task', category: 'Others' },
       })
+    )
+  })
+})
+
+describe('task sorting helpers', () => {
+  it('sorts priority ascending from low to critical', () => {
+    const tasks = [
+      { priority: 'Critical' },
+      { priority: 'Low' },
+      { priority: 'High' },
+      { priority: 'Medium' },
+    ] as const
+
+    expect([...tasks].sort((a, b) => compareTasksByPriority(a, b, 'asc'))).toEqual([
+      { priority: 'Low' },
+      { priority: 'Medium' },
+      { priority: 'High' },
+      { priority: 'Critical' },
+    ])
+  })
+
+  it('sorts priority descending from critical to low', () => {
+    const tasks = [
+      { priority: 'Low' },
+      { priority: 'Critical' },
+      { priority: 'Medium' },
+      { priority: 'High' },
+    ] as const
+
+    expect([...tasks].sort((a, b) => compareTasksByPriority(a, b, 'desc'))).toEqual([
+      { priority: 'Critical' },
+      { priority: 'High' },
+      { priority: 'Medium' },
+      { priority: 'Low' },
+    ])
+  })
+})
+
+describe('reminder query helpers', () => {
+  it('looks far enough ahead to include one-week reminders', () => {
+    const now = new Date('2026-06-26T12:00:00.000Z')
+    const tenMinutes = 10 * 60 * 1000
+
+    expect(getReminderDeadlineCeiling(now, tenMinutes).toISOString()).toBe(
+      '2026-07-03T12:10:00.000Z'
     )
   })
 })

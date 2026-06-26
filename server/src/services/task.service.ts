@@ -8,7 +8,7 @@ import { ActivityLog } from '../models/ActivityLog.model'
 import { User } from '../models/User.model'
 import { CreateTaskInput, UpdateTaskInput, TaskQueryInput } from '../validators/task.validator'
 import { createNotFoundError, createForbiddenError } from '../utils/AppError'
-import { TaskStatus, DashboardStats } from '../types'
+import { DashboardStats, PRIORITY_WEIGHT, REMINDER_OFFSETS, TaskStatus } from '../types'
 
 export interface PaginatedResult<T> {
   items: T[]
@@ -25,12 +25,18 @@ export interface DashboardData {
   recentActivity: unknown[]
 }
 
-// Priority sort order used for in-memory sort when needed
-const PRIORITY_ORDER: Record<string, number> = {
-  Critical: 4,
-  High: 3,
-  Medium: 2,
-  Low: 1,
+export function compareTasksByPriority(
+  a: Pick<ITask, 'priority'>,
+  b: Pick<ITask, 'priority'>,
+  order: 'asc' | 'desc'
+): number {
+  const diff = (PRIORITY_WEIGHT[a.priority] ?? 0) - (PRIORITY_WEIGHT[b.priority] ?? 0)
+  return order === 'asc' ? diff : -diff
+}
+
+export function getReminderDeadlineCeiling(now: Date, windowMs: number): Date {
+  const maxOffset = Math.max(...Object.values(REMINDER_OFFSETS))
+  return new Date(now.getTime() + maxOffset + windowMs)
 }
 
 export class TaskService {
@@ -108,11 +114,7 @@ export class TaskService {
     // In-memory priority sort if requested
     const tasks =
       sort === 'priority'
-        ? [...rawTasks].sort((a, b) => {
-            const diff =
-              (PRIORITY_ORDER[b.priority] ?? 0) - (PRIORITY_ORDER[a.priority] ?? 0)
-            return order === 'desc' ? -diff : diff
-          })
+        ? [...rawTasks].sort((a, b) => compareTasksByPriority(a, b, order))
         : rawTasks
 
     return {
@@ -309,11 +311,11 @@ export class TaskService {
   /** Used by cron jobs */
   async getPendingReminderTasks(windowMs: number): Promise<ITask[]> {
     const now = new Date()
-    const ceiling = new Date(now.getTime() + windowMs)
+    const ceiling = getReminderDeadlineCeiling(now, windowMs)
     return Task.find({
       isArchived: false,
       status: { $nin: ['Completed', 'Missed'] },
-      deadline: { $gte: now, $lte: ceiling },
+      deadline: { $lte: ceiling },
       'reminders.sent': false,
     }).populate('userId', 'fcmToken webPushSubscription email name')
   }
