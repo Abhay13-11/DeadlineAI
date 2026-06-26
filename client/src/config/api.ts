@@ -1,12 +1,7 @@
 const DEFAULT_API_URL = 'http://localhost:5000/api/v1'
 
 function normalizeApiUrl(rawUrl: string | undefined): string {
-  const fallback = import.meta.env.DEV ? DEFAULT_API_URL : ''
-  const value = (rawUrl?.trim() || fallback).replace(/\/+$/, '')
-
-  if (!value) {
-    throw new Error('VITE_API_URL is required for production builds.')
-  }
+  const value = (rawUrl?.trim() || DEFAULT_API_URL).replace(/\/+$/, '')
 
   let parsed: URL
   try {

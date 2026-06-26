@@ -2,11 +2,11 @@ import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {  X, FileText, Image, Loader2, CheckCircle, Plus } from 'lucide-react'
 import { aiService } from '../../services/aiService'
-import { taskService } from '../../services/taskService'
 import { CreateTaskPayload } from '../../types'
 import { TaskForm } from '../tasks/TaskForm'
 import { cn } from '../../lib/utils'
 import toast from 'react-hot-toast'
+import { useTasks } from '../../hooks/useTasks'
 
 type Mode = 'idle' | 'uploading' | 'reviewing' | 'done'
 
@@ -34,6 +34,7 @@ export function OCRUploader({ onClose }: Props) {
   const [prefillTask, setPrefillTask] = useState<Partial<CreateTaskPayload> | null>(null)
   const [saving, setSaving] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const { createTask } = useTasks()
 
   const processFile = async (file: File) => {
     const maxSize = 10 * 1024 * 1024
@@ -89,7 +90,7 @@ export function OCRUploader({ onClose }: Props) {
     setSaving(true)
     try {
       await Promise.all(selected.map((t) =>
-        taskService.create({
+        createTask({
           title: t.title,
           category: t.category as CreateTaskPayload['category'],
           priority: t.priority as CreateTaskPayload['priority'],
@@ -100,7 +101,7 @@ export function OCRUploader({ onClose }: Props) {
           source: 'ocr',
           reminders: t.deadline ? [{ type: '1d' as never }, { type: '1h' as never }] : [],
           recurring: { enabled: false, interval: 1 },
-        })
+        }, { silent: true })
       ))
       toast.success(`Created ${selected.length} task(s)!`)
       setMode('done')

@@ -10,6 +10,12 @@ import { formatCategoryLabel } from '../../utils/formatters'
 import { useTasks } from '../../hooks/useTasks'
 import { taskService } from '../../services/taskService'
 import { cn } from '../../lib/utils'
+import {
+  buildDeadlineISOString,
+  buildLocalDateTimeISOString,
+  formatDateInputValue,
+  formatDateTimeLocalInputValue,
+} from '../../utils/taskUtils'
 import toast from 'react-hot-toast'
 
 interface Props {
@@ -25,8 +31,21 @@ const DEFAULT: CreateTaskPayload = {
   requiredDocuments: [], reminders: [], source: 'manual',
 }
 
+function normalizeFormInput(input?: Partial<CreateTaskPayload>): CreateTaskPayload {
+  const merged = { ...DEFAULT, ...input }
+  return {
+    ...merged,
+    deadline: formatDateInputValue(merged.deadline),
+    deadlineTime: merged.deadlineTime ?? '',
+    reminders: (merged.reminders ?? []).map((reminder) => ({
+      ...reminder,
+      customTime: formatDateTimeLocalInputValue(reminder.customTime),
+    })),
+  }
+}
+
 export function TaskForm({ taskId, onClose, prefill }: Props) {
-  const [form, setForm] = useState<CreateTaskPayload>({ ...DEFAULT, ...prefill })
+  const [form, setForm] = useState<CreateTaskPayload>(() => normalizeFormInput(prefill))
   const [activeTab, setActiveTab] = useState<'basic' | 'details' | 'reminders'>('basic')
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(false)
@@ -42,12 +61,15 @@ export function TaskForm({ taskId, onClose, prefill }: Props) {
         setForm({
           title: t.title, description: t.description ?? '',
           category: t.category, priority: t.priority, status: t.status,
-          deadline: t.deadline ? t.deadline.split('T')[0] : '',
+          deadline: formatDateInputValue(t.deadline),
           deadlineTime: t.deadlineTime ?? '',
           location: t.location ?? '', meetingLink: t.meetingLink ?? '',
           websiteLink: t.websiteLink ?? '', notes: t.notes ?? '',
           requiredDocuments: t.requiredDocuments,
-          reminders: t.reminders.map((r) => ({ type: r.type, customTime: r.customTime })),
+          reminders: t.reminders.map((r) => ({
+            type: r.type,
+            customTime: formatDateTimeLocalInputValue(r.customTime),
+          })),
           source: t.source,
         })
       })
@@ -77,17 +99,26 @@ export function TaskForm({ taskId, onClose, prefill }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.title.trim()) { toast.error('Title is required'); return }
+    if ((form.reminders ?? []).some((reminder) => reminder.type === 'custom' && !reminder.customTime)) {
+      toast.error('Choose a time for custom reminders')
+      setActiveTab('reminders')
+      return
+    }
     setLoading(true)
     try {
       const payload: CreateTaskPayload = {
         ...form,
-        deadline: form.deadline ? new Date(form.deadline).toISOString() : undefined,
+        deadline: buildDeadlineISOString(form.deadline, form.deadlineTime),
         deadlineTime: form.deadlineTime || undefined,
         description: form.description || undefined,
         location: form.location || undefined,
         meetingLink: form.meetingLink || undefined,
         websiteLink: form.websiteLink || undefined,
         notes: form.notes || undefined,
+        reminders: (form.reminders ?? []).map((reminder) => ({
+          ...reminder,
+          customTime: buildLocalDateTimeISOString(reminder.customTime),
+        })),
       }
       if (isEditing) {
         await updateTask(taskId, payload)
@@ -287,7 +318,11 @@ export function TaskForm({ taskId, onClose, prefill }: Props) {
                           value={r.type}
                           onChange={(e) => {
                             const updated = [...(form.reminders ?? [])]
-                            updated[i] = { ...updated[i], type: e.target.value as ReminderType }
+                            updated[i] = {
+                              ...updated[i],
+                              type: e.target.value as ReminderType,
+                              customTime: e.target.value === 'custom' ? updated[i].customTime : undefined,
+                            }
                             set('reminders', updated)
                           }}
                           className="input-base flex-1"
@@ -303,6 +338,18 @@ export function TaskForm({ taskId, onClose, prefill }: Props) {
                         <button type="button" onClick={() => removeReminder(i)} className="text-text-muted hover:text-accent-danger transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
+                        {r.type === 'custom' && (
+                          <input
+                            type="datetime-local"
+                            value={r.customTime ?? ''}
+                            onChange={(e) => {
+                              const updated = [...(form.reminders ?? [])]
+                              updated[i] = { ...updated[i], customTime: e.target.value }
+                              set('reminders', updated)
+                            }}
+                            className="input-base flex-1"
+                          />
+                        )}
                       </div>
                     ))}
                     <button

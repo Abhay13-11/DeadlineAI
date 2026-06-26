@@ -30,7 +30,7 @@ export function useTasks() {
       const res = await taskService.getTasks(filters)
       setTasks(res.data, res.meta.total, res.meta.page, res.meta.totalPages)
     } catch {
-      toast.error('Failed to load tasks')
+      toast.error('Failed to load tasks', { id: 'tasks-load-error' })
     } finally {
       setLoading(false)
     }
@@ -56,7 +56,7 @@ export function useTasks() {
       })
       .catch((error: unknown) => {
         setDashboardStatus('error')
-        toast.error('Failed to load dashboard')
+        toast.error('Failed to load dashboard', { id: 'dashboard-load-error' })
         throw error
       })
       .finally(() => {
@@ -66,13 +66,18 @@ export function useTasks() {
     return dashboardRequest
   }, [setDashboard, setDashboardStatus])
 
-  const createTask = useCallback(async (payload: CreateTaskPayload) => {
+  const createTask = useCallback(async (
+    payload: CreateTaskPayload,
+    options: { silent?: boolean } = {}
+  ) => {
     const res = await taskService.create(payload)
     upsertTask(res.data)
     if (useTaskStore.getState().dashboard) {
       await fetchDashboard(true).catch(() => undefined)
     }
-    toast.success('Task created!')
+    if (!options.silent) {
+      toast.success('Task created!')
+    }
     return res.data
   }, [fetchDashboard, upsertTask])
 

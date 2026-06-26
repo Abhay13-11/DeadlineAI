@@ -10,6 +10,7 @@ import { CATEGORY_COLORS } from '../../types'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '../../components/common/PageHeader'
 import { Plus } from 'lucide-react'
+import { formatDateInputValue } from '../../utils/taskUtils'
 
 export function CalendarPage() {
   const { tasks, fetchTasks } = useTasks()
@@ -26,7 +27,7 @@ export function CalendarPage() {
     .map((t) => ({
       id: t._id,
       title: t.title,
-      date: t.deadline!.split('T')[0],
+      date: formatDateInputValue(t.deadline),
       color: CATEGORY_COLORS[t.category],
       extendedProps: { status: t.status, priority: t.priority },
       classNames: t.status === 'Completed' ? ['opacity-50'] : [],

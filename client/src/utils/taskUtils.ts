@@ -41,3 +41,48 @@ export function getCompletionRate(tasks: ITask[]): number {
   const done = tasks.filter((t) => t.status === 'Completed').length
   return Math.round((done / tasks.length) * 100)
 }
+
+export function buildDeadlineISOString(dateValue?: string, timeValue?: string): string | undefined {
+  if (!dateValue) return undefined
+
+  const [year, month, day] = dateValue.split('-').map(Number)
+  if (!year || !month || !day) return undefined
+
+  const [hour = 0, minute = 0] = timeValue ? timeValue.split(':').map(Number) : []
+  return new Date(year, month - 1, day, hour, minute, 0, 0).toISOString()
+}
+
+export function buildLocalDateTimeISOString(value?: string): string | undefined {
+  if (!value) return undefined
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
+}
+
+export function formatDateInputValue(value?: string): string {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+export function formatTimeInputValue(value?: string): string {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${hours}:${minutes}`
+}
+
+export function formatDateTimeLocalInputValue(value?: string): string {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  return `${formatDateInputValue(value)}T${formatTimeInputValue(value)}`
+}

@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Sparkles, Loader2, CheckCircle, Pencil } from 'lucide-react'
 import { aiService } from '../../services/aiService'
-import { taskService } from '../../services/taskService'
 import { CreateTaskPayload } from '../../types'
 import { TaskForm } from '../tasks/TaskForm'
 import { formatDeadline } from '../../utils/formatters'
 import { cn } from '../../lib/utils'
 import toast from 'react-hot-toast'
+import { useTasks } from '../../hooks/useTasks'
 
 interface Props {
   onClose: () => void
@@ -22,6 +22,7 @@ export function NLTaskCreator({ onClose }: Props) {
   const [parsed, setParsed] = useState<Partial<CreateTaskPayload> & { confidence?: number } | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [creating, setCreating] = useState(false)
+  const { createTask } = useTasks()
 
   const EXAMPLES = [
     'HackVega registration ends 25 June 11:59 PM. Need Resume, Aadhaar and GitHub.',
@@ -48,7 +49,7 @@ export function NLTaskCreator({ onClose }: Props) {
     if (!parsed) return
     setCreating(true)
     try {
-      await taskService.create({
+      await createTask({
         title: parsed.title ?? 'Untitled Task',
         description: parsed.description,
         category: parsed.category ?? 'Others',
@@ -61,7 +62,6 @@ export function NLTaskCreator({ onClose }: Props) {
         source: 'ai',
         recurring: { enabled: false, interval: 1 },
       })
-      toast.success('Task created!')
       setStep('done')
     } catch {
       toast.error('Failed to create task')
