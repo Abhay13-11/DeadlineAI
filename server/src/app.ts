@@ -20,6 +20,13 @@ import { logger } from './utils/logger'
 import { getHealthStatus } from './utils/healthCheck'
 
 const app = express()
+const DEV_CLIENT_ORIGINS = [
+  env.CLIENT_URL,
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+]
+const allowedOrigins =
+  env.NODE_ENV === 'production' ? [env.CLIENT_URL] : Array.from(new Set(DEV_CLIENT_ORIGINS))
 
 // Required for express-rate-limit to correctly identify client IPs.
 // Without this, req.ip is undefined or ::ffff:127.0.0.1 in some environments,
@@ -35,7 +42,14 @@ app.use(
 
 app.use(
   cors({
-    origin: env.CLIENT_URL,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true)
+        return
+      }
+
+      callback(new Error(`Origin ${origin} is not allowed by CORS`))
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
