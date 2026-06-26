@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { Zap, CheckCircle2 } from 'lucide-react'
-
-const GOOGLE_AUTH_URL = `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') ?? 'http://localhost:5000'}/api/v1/auth/google`
+import { GOOGLE_AUTH_URL } from '@/config/api'
 
 const FEATURES = [
   'AI-powered task creation from text',

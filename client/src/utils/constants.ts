@@ -42,7 +42,3 @@ export const CATEGORY_LABELS: Record<string, string> = {
   JobApplication: 'Job Application',
   InProgress:     'In Progress',
 }
-
-export const GOOGLE_AUTH_URL = `${
-  import.meta.env.VITE_API_URL?.replace('/api/v1', '') ?? 'http://localhost:5000'
-}/api/v1/auth/google`
