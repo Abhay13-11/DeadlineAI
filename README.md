@@ -768,11 +768,11 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## 📬 Contact
 
-**Abhay Singh**
+**Abhay Singh Chauhan**
 
 [![GitHub](https://img.shields.io/badge/GitHub-Abhay13--11-181717?style=flat-square&logo=github)](https://github.com/Abhay13-11)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat-square&logo=linkedin)](https://linkedin.com/<YOUR_LINKEDIN_USERNAME>)
-[![Email](https://img.shields.io/badge/Email-Contact-EA4335?style=flat-square&logo=gmail)](mailto:<YOUR_EMAIL>)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/abhay-singh-chauhan13/)
+[![Email](https://img.shields.io/badge/Email-Contact-EA4335?style=flat-square&logo=gmail)](mailto:singhabhaydpr@gmail.com)
 
 ---
 
